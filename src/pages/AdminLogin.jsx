@@ -3,37 +3,45 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
 export default function AdminLogin() {
-  const { login, isAuthenticated } = useAuth()
+  const { login, isAuthenticated, loading } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
-
   const from = location.state?.from || '/admin/dashboard'
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate(from, { replace: true })
+    if (location.pathname === '/admin') {
+      navigate('/admin/login', { replace: true })
     }
-  }, [isAuthenticated, from, navigate])
+  }, [location.pathname, navigate])
+
+  useEffect(() => {
+    if (!loading && isAuthenticated) navigate(from, { replace: true })
+  }, [isAuthenticated, loading, from, navigate])
 
   const handleChange = (event) => {
     const { name, value } = event.target
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     setError('')
     if (!form.email || !form.password) {
       setError('Please enter email and password.')
       return
     }
-    if (!login(form)) {
-      setError('Invalid admin credentials')
-      return
+    setSubmitting(true)
+    try {
+      await login(form)
+      navigate('/admin/dashboard', { replace: true })
+    } catch (err) {
+      setError(err.message || 'Invalid credentials')
+    } finally {
+      setSubmitting(false)
     }
-    navigate('/admin/dashboard', { replace: true })
   }
 
   return (
@@ -42,9 +50,8 @@ export default function AdminLogin() {
         <div className="panel-copy">
           <span className="section-label">Admin portal</span>
           <h1>Secure admin sign-in</h1>
-          <p>Only registered admins can manage product listings, categories and incoming enquiries.</p>
+          <p>Only registered team members can manage product listings, categories and enquiries.</p>
         </div>
-
         <form className="admin-login-form" onSubmit={handleSubmit}>
           <label>
             Email
@@ -54,11 +61,9 @@ export default function AdminLogin() {
             Password
             <input name="password" value={form.password} onChange={handleChange} type="password" autoComplete="current-password" />
           </label>
-
           {error ? <p className="form-status form-status--error">{error}</p> : null}
-
-          <button className="button button--primary full-width" type="submit">
-            Login
+          <button className="button button--primary full-width" type="submit" disabled={submitting}>
+            {submitting ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
       </section>

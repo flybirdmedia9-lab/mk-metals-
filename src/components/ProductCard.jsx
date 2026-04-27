@@ -9,8 +9,10 @@ export default function ProductCard({ product, onAddToCart }) {
   return (
     <article className="product-card">
       <div className="product-card-hero">
-        <img src={product.image} alt={product.name} loading="lazy" />
-        <div className="product-card-tag">{product.category.replace('-', ' ')}</div>
+        {product.image ? <img src={product.image} alt={product.name} loading="lazy" /> : <div className="product-card-image-placeholder" />}
+        {(product.categoryName || product.category) && (
+          <div className="product-card-tag">{(product.categoryName || product.category).replace(/-/g, ' ')}</div>
+        )}
       </div>
       <div className="product-card-body">
         <div>

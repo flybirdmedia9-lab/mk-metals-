@@ -1,106 +1,117 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getEnquiries, saveEnquiries } from '../data/storage.js'
+import { enquiriesApi } from '../utils/api.js'
+import { useAuth } from '../context/AuthContext.jsx'
 
 const STATUS_OPTIONS = ['New', 'Contacted', 'Quotation Sent', 'Closed']
 
 export default function AdminEnquiries() {
+  const { admin } = useAuth()
   const [enquiries, setEnquiries] = useState([])
+  const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('All')
-  const [activeEnquiry, setActiveEnquiry] = useState(null)
+  const [saving, setSaving] = useState({})
 
   useEffect(() => {
-    setEnquiries(getEnquiries())
+    enquiriesApi.getAll()
+      .then(setEnquiries)
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, [])
 
-  const filteredEnquiries = useMemo(() => {
-    if (filter === 'All') return enquiries
-    return enquiries.filter((item) => item.status === filter)
-  }, [enquiries, filter])
+  const filtered = useMemo(
+    () => (filter === 'All' ? enquiries : enquiries.filter((e) => e.status === filter)),
+    [enquiries, filter],
+  )
 
-  const updateStatus = (id, status) => {
-    const next = enquiries.map((item) => (item.id === id ? { ...item, status } : item))
-    saveEnquiries(next)
-    setEnquiries(next)
+  const updateField = async (id, field, value) => {
+    setEnquiries((prev) => prev.map((e) => (e.id === id ? { ...e, [field]: value } : e)))
+    setSaving((prev) => ({ ...prev, [id]: true }))
+    try {
+      const enquiry = enquiries.find((e) => e.id === id)
+      await enquiriesApi.update(id, { status: enquiry.status, notes: enquiry.notes, [field]: value })
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setSaving((prev) => ({ ...prev, [id]: false }))
+    }
   }
 
-  const updateNotes = (id, notes) => {
-    const next = enquiries.map((item) => (item.id === id ? { ...item, notes } : item))
-    saveEnquiries(next)
-    setEnquiries(next)
+  const handleDelete = async (id) => {
+    if (!confirm('Delete this enquiry?')) return
+    try {
+      await enquiriesApi.delete(id)
+      setEnquiries((prev) => prev.filter((e) => e.id !== id))
+    } catch (err) {
+      alert(err.message)
+    }
   }
+
+  if (loading) return <main className="admin-section-shell"><p className="admin-loading">Loading enquiries…</p></main>
 
   return (
     <main className="admin-section-shell">
       <div className="admin-grid">
         <div className="admin-panel admin-panel--wide">
           <div className="panel-head">
-            <div>
-              <span className="section-label">Enquiries</span>
-              <h1>Customer enquiries</h1>
-            </div>
-            <div className="checkbox-group">
-              <select value={filter} onChange={(event) => setFilter(event.target.value)}>
-                {['All', ...STATUS_OPTIONS].map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <div><span className="section-label">Enquiries</span><h1>Customer enquiries</h1></div>
+            <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+              {['All', ...STATUS_OPTIONS].map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
           </div>
 
-          {filteredEnquiries.length === 0 ? (
+          {filtered.length === 0 ? (
             <div className="empty-state">
               <h2>No enquiries found</h2>
               <p>Enquiry records will appear here when customers contact you.</p>
             </div>
           ) : (
             <div className="enquiry-list">
-              {filteredEnquiries.map((enquiry) => (
-                <article key={enquiry.id} className="enquiry-card">
+              {filtered.map((e) => (
+                <article key={e.id} className="enquiry-card">
                   <div className="enquiry-row">
                     <div>
-                      <span className="enquiry-meta">{new Date(enquiry.createdAt).toLocaleString()}</span>
-                      <h3>{enquiry.subject || 'Product enquiry'}</h3>
-                      <p>{enquiry.message}</p>
+                      <span className="enquiry-meta">{new Date(e.created_at).toLocaleString()}</span>
+                      <h3>{e.subject || 'Product enquiry'}</h3>
+                      <p>{e.message}</p>
                     </div>
                     <div className="enquiry-contact">
-                      <span>{enquiry.name || 'Unknown customer'}</span>
-                      <span>{enquiry.company || 'No company'}</span>
-                      <a href={`tel:${enquiry.phone}`}>{enquiry.phone || 'No phone'}</a>
-                      <a href={`mailto:${enquiry.email || 'info@mkmetals.com'}`}>{enquiry.email || 'info@mkmetals.com'}</a>
+                      <span>{e.name}</span>
+                      <span>{e.company || 'No company'}</span>
+                      {e.phone && <a href={`tel:${e.phone}`}>{e.phone}</a>}
+                      {e.email && <a href={`mailto:${e.email}`}>{e.email}</a>}
                     </div>
                   </div>
                   <div className="panel-head">
                     <div className="form-grid">
                       <label>
                         Status
-                        <select value={enquiry.status || 'New'} onChange={(event) => updateStatus(enquiry.id, event.target.value)}>
-                          {STATUS_OPTIONS.map((statusOption) => (
-                            <option key={statusOption} value={statusOption}>
-                              {statusOption}
-                            </option>
-                          ))}
+                        <select value={e.status || 'New'} onChange={(ev) => updateField(e.id, 'status', ev.target.value)}>
+                          {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </label>
                       <label>
                         Notes
                         <textarea
-                          value={enquiry.notes || ''}
-                          onChange={(event) => updateNotes(enquiry.id, event.target.value)}
+                          value={e.notes || ''}
+                          onChange={(ev) => setEnquiries((prev) => prev.map((x) => (x.id === e.id ? { ...x, notes: ev.target.value } : x)))}
+                          onBlur={(ev) => updateField(e.id, 'notes', ev.target.value)}
                           rows="2"
                         />
                       </label>
                     </div>
                     <div className="form-actions">
-                      <a href={`https://wa.me/91${enquiry.phone}?text=${encodeURIComponent(`Hi ${enquiry.name}, I'm following up on your enquiry.`)}`} target="_blank" rel="noreferrer" className="button button--secondary">
-                        WhatsApp
-                      </a>
-                      <a href={`tel:${enquiry.phone}`} className="button button--secondary">
-                        Call
-                      </a>
+                      {e.phone && (
+                        <a href={`https://wa.me/91${e.phone}?text=${encodeURIComponent(`Hi ${e.name}, following up on your enquiry.`)}`} target="_blank" rel="noreferrer" className="button button--secondary">
+                          WhatsApp
+                        </a>
+                      )}
+                      {e.phone && <a href={`tel:${e.phone}`} className="button button--secondary">Call</a>}
+                      {(admin?.role === 'owner' || admin?.role === 'manager') && (
+                        <button type="button" className="button button--danger" onClick={() => handleDelete(e.id)}>Delete</button>
+                      )}
                     </div>
                   </div>
+                  {saving[e.id] && <p className="form-status form-status--info">Saving…</p>}
                 </article>
               ))}
             </div>

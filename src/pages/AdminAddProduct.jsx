@@ -1,15 +1,7 @@
 import AdminProductForm from '../components/AdminProductForm.jsx'
-import { getProducts, saveProducts } from '../data/storage.js'
+import { productsApi } from '../utils/api.js'
 
 export default function AdminAddProduct() {
-  const handleSave = (product) => {
-    const newProduct = {
-      ...product,
-      id: crypto.randomUUID(),
-      slug: product.slug || product.name.toLowerCase().replace(/\s+/g, '-'),
-    }
-    saveProducts([newProduct, ...getProducts()])
-  }
-
+  const handleSave = (product) => productsApi.create(product)
   return <AdminProductForm onSave={handleSave} mode="add" />
 }

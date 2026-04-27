@@ -1,28 +1,23 @@
-import { useMemo } from 'react'
-import { getCategories, getEnquiries, getProducts } from '../data/storage.js'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { statsApi } from '../utils/api.js'
 
 export default function AdminDashboard() {
-  const products = getProducts()
-  const categories = getCategories()
-  const enquiries = getEnquiries()
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  const overview = useMemo(
-    () => ({
-      totalProducts: products.length,
-      totalCategories: categories.length,
-      totalEnquiries: enquiries.length,
-      featured: products.filter((item) => item.featured).length,
-      lowStock: products.filter((item) => item.status === 'Low stock').length,
-      outOfStock: products.filter((item) => item.status === 'Out of stock').length,
-      popular: products.filter((item) => item.popular).length,
-      latest: products.filter((item) => item.latest).length,
-    }),
-    [products, categories, enquiries],
-  )
+  useEffect(() => {
+    statsApi.get()
+      .then(setData)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false))
+  }, [])
 
-  const recentEnquiries = enquiries.slice(0, 3)
-  const recentProducts = products.slice(0, 4)
+  if (loading) return <main className="admin-section-shell"><p className="admin-loading">Loading dashboard…</p></main>
+  if (error) return <main className="admin-section-shell"><p className="form-status form-status--error">{error}</p></main>
+
+  const { stats, recentEnquiries, recentProducts } = data
 
   return (
     <main className="admin-section-shell">
@@ -34,21 +29,19 @@ export default function AdminDashboard() {
               <h1>Business management overview</h1>
             </div>
           </div>
-          <p>
-            Monitor product performance, track customer enquiries, and manage inventory from one business-focused admin hub.
-          </p>
+          <p>Monitor product performance, track customer enquiries, and manage inventory from one business-focused admin hub.</p>
         </div>
 
         <div className="admin-overview-grid">
           {[
-            { label: 'Total products', value: overview.totalProducts },
-            { label: 'Total categories', value: overview.totalCategories },
-            { label: 'Total enquiries', value: overview.totalEnquiries },
-            { label: 'Featured products', value: overview.featured },
-            { label: 'Low stock', value: overview.lowStock },
-            { label: 'Out of stock', value: overview.outOfStock },
-            { label: 'Popular products', value: overview.popular },
-            { label: 'Latest products', value: overview.latest },
+            { label: 'Total products', value: stats.totalProducts },
+            { label: 'Total categories', value: stats.totalCategories },
+            { label: 'Total enquiries', value: stats.totalEnquiries },
+            { label: 'New enquiries', value: stats.newEnquiries },
+            { label: 'Featured products', value: stats.featured },
+            { label: 'Low stock', value: stats.lowStock },
+            { label: 'Out of stock', value: stats.outOfStock },
+            { label: 'Team members', value: stats.totalTeam },
           ].map((card) => (
             <article key={card.label} className="admin-card">
               <span>{card.label}</span>
@@ -61,51 +54,39 @@ export default function AdminDashboard() {
           <div className="admin-panel admin-panel--wide">
             <div className="panel-head">
               <h2>Recent enquiries</h2>
-              <Link to="/admin/enquiries" className="button button--secondary">
-                View all enquiries
-              </Link>
+              <Link to="/admin/enquiries" className="button button--secondary">View all</Link>
             </div>
             <div className="enquiry-list">
-              {recentEnquiries.length > 0 ? (
-                recentEnquiries.map((enquiry) => (
-                  <article key={enquiry.id} className="enquiry-card">
-                    <div>
-                      <span className="enquiry-meta">{new Date(enquiry.createdAt).toLocaleString()}</span>
-                      <h3>{enquiry.subject || 'Product enquiry'}</h3>
-                      <p>{enquiry.message}</p>
-                    </div>
-                    <div className="enquiry-contact">
-                      <span>{enquiry.name || 'Customer'}</span>
-                      <span>{enquiry.company || 'No company'}</span>
-                    </div>
-                  </article>
-                ))
-              ) : (
+              {recentEnquiries.length > 0 ? recentEnquiries.map((e) => (
+                <article key={e.id} className="enquiry-card">
+                  <div>
+                    <span className="enquiry-meta">{new Date(e.created_at).toLocaleString()}</span>
+                    <h3>{e.subject || 'Product enquiry'}</h3>
+                    <p>{e.message}</p>
+                  </div>
+                  <div className="enquiry-contact">
+                    <span>{e.name}</span>
+                    <span>{e.company || 'No company'}</span>
+                  </div>
+                </article>
+              )) : (
                 <div className="empty-state">
-                  <h2>No enquiries found</h2>
-                  <p>Customer messages will appear here when they are submitted.</p>
+                  <h2>No enquiries yet</h2>
+                  <p>Customer messages will appear here when submitted.</p>
                 </div>
               )}
             </div>
           </div>
 
           <div className="admin-panel admin-panel--wide">
-            <div className="panel-head">
-              <h2>Quick actions</h2>
-            </div>
+            <div className="panel-head"><h2>Quick actions</h2></div>
             <div className="admin-action-grid">
-              <Link to="/admin/add-product" className="button button--primary">
-                Add new product
-              </Link>
-              <Link to="/admin/products" className="button button--secondary">
-                Manage products
-              </Link>
-              <Link to="/admin/categories" className="button button--secondary">
-                Manage categories
-              </Link>
-              <Link to="/admin/enquiries" className="button button--secondary">
-                Review enquiries
-              </Link>
+              <Link to="/admin/add-product" className="button button--primary">Add new product</Link>
+              <Link to="/admin/products" className="button button--secondary">Manage products</Link>
+              <Link to="/admin/stock" className="button button--secondary">Update stock</Link>
+              <Link to="/admin/categories" className="button button--secondary">Manage categories</Link>
+              <Link to="/admin/enquiries" className="button button--secondary">Review enquiries</Link>
+              <Link to="/admin/team" className="button button--secondary">Manage team</Link>
             </div>
           </div>
         </div>
@@ -113,9 +94,7 @@ export default function AdminDashboard() {
         <div className="admin-panel admin-panel--full">
           <div className="panel-head">
             <h2>Recent products</h2>
-            <Link to="/admin/products" className="button button--secondary">
-              View all products
-            </Link>
+            <Link to="/admin/products" className="button button--secondary">View all</Link>
           </div>
           <div className="admin-table">
             <div className="table-row table-head">
@@ -124,19 +103,17 @@ export default function AdminDashboard() {
               <span>Stock</span>
               <span>Status</span>
             </div>
-            {recentProducts.length > 0 ? (
-              recentProducts.map((product) => (
-                <div key={product.id} className="table-row">
-                  <span>{product.name}</span>
-                  <span>{categories.find((cat) => cat.id === product.category)?.name || '—'}</span>
-                  <span>{product.stock}</span>
-                  <span>{product.status}</span>
-                </div>
-              ))
-            ) : (
+            {recentProducts.length > 0 ? recentProducts.map((p) => (
+              <div key={p.id} className="table-row">
+                <span>{p.name}</span>
+                <span>{p.category_name || '—'}</span>
+                <span>{p.stock}</span>
+                <span>{p.status}</span>
+              </div>
+            )) : (
               <div className="empty-state">
-                <h2>No products available</h2>
-                <p>Create products from the Add Product menu to populate your catalog.</p>
+                <h2>No products yet</h2>
+                <p>Add products from the Add Product menu.</p>
               </div>
             )}
           </div>

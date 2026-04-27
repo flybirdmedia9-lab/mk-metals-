@@ -5,17 +5,20 @@ import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { CartProvider } from './context/CartContext.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 
 const Router = window.location.protocol === 'file:' ? HashRouter : BrowserRouter
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Router>
-      <AuthProvider>
-        <CartProvider>
-          <App />
-        </CartProvider>
-      </AuthProvider>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <AuthProvider>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </AuthProvider>
+      </Router>
+    </ErrorBoundary>
   </StrictMode>,
 )

@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
-import { addEnquiry } from '../data/storage.js'
+import { enquiriesApi } from '../utils/api.js'
 
 const initialState = {
   name: '',
+  email: '',
   phone: '',
   company: '',
   message: '',
@@ -11,11 +12,19 @@ const initialState = {
 export default function EnquiryForm({ subject }) {
   const [form, setForm] = useState(initialState)
   const [status, setStatus] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
 
   const subjectText = subject ? `Product: ${subject}` : 'General enquiry'
 
   const whatsappLink = useMemo(() => {
-    const message = `${subjectText}\nName: ${form.name}\nCompany: ${form.company}\nPhone: ${form.phone}\nMessage: ${form.message}`
+    const message = [
+      subjectText,
+      `Name: ${form.name}`,
+      `Email: ${form.email}`,
+      `Company: ${form.company}`,
+      `Phone: ${form.phone}`,
+      `Message: ${form.message}`,
+    ].join('\n')
     return `https://wa.me/918125139139?text=${encodeURIComponent(message)}`
   }, [form, subjectText])
 
@@ -24,16 +33,29 @@ export default function EnquiryForm({ subject }) {
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
+
     if (!form.name.trim() || !form.phone.trim() || !form.message.trim()) {
-      setStatus({ type: 'error', message: 'Please fill in your name, phone and message.' })
+      setStatus({ type: 'error', message: 'Please fill in your name, phone, and message.' })
       return
     }
 
-    addEnquiry({ ...form, subject: subjectText })
-    setStatus({ type: 'success', message: 'Your enquiry was saved. Use WhatsApp to follow up.' })
-    setForm(initialState)
+    setSubmitting(true)
+    setStatus(null)
+
+    try {
+      await enquiriesApi.submit({
+        ...form,
+        subject: subjectText,
+      })
+      setStatus({ type: 'success', message: 'Enquiry submitted. Our admin team will contact you shortly.' })
+      setForm(initialState)
+    } catch {
+      setStatus({ type: 'error', message: 'Could not submit enquiry. Please use WhatsApp to contact us.' })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -50,6 +72,10 @@ export default function EnquiryForm({ subject }) {
             <input name="name" value={form.name} onChange={handleChange} placeholder="Your full name" />
           </label>
           <label>
+            Email
+            <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@example.com" />
+          </label>
+          <label>
             Phone
             <input name="phone" value={form.phone} onChange={handleChange} placeholder="Mobile number" />
           </label>
@@ -64,8 +90,8 @@ export default function EnquiryForm({ subject }) {
         </div>
 
         <div className="form-actions">
-          <button className="button button--primary" type="submit">
-            Save Enquiry
+          <button className="button button--primary" type="submit" disabled={submitting}>
+            {submitting ? 'Sending...' : 'Send Enquiry'}
           </button>
           <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="button button--outline">
             Send via WhatsApp

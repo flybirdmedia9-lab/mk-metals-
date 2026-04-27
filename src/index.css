@@ -466,6 +466,12 @@ a.button:hover {
   object-fit: cover;
 }
 
+.product-card-image-placeholder {
+  width: 100%;
+  height: 18rem;
+  background: linear-gradient(135deg, var(--color-bg-secondary, #f1f5f9), var(--color-bg-tertiary, #e2e8f0));
+}
+
 .product-card-tag {
   position: absolute;
   left: 1rem;
@@ -1511,3 +1517,73 @@ body.admin-route .site-footer {
 body.admin-route .page-container {
   padding-top: 0;
 }
+
+/* ── New admin utilities ───────────────────────────────────── */
+.admin-loading {
+  padding: 3rem;
+  color: hsl(var(--muted));
+  text-align: center;
+}
+
+.button--danger {
+  background: hsl(0 72% 51%);
+  color: #fff;
+  border-color: hsl(0 72% 51%);
+}
+.button--danger:hover { background: hsl(0 72% 44%); }
+
+.text-button--active { color: hsl(38 92% 50%); font-weight: 700; }
+
+.table-row--warning { border-left: 3px solid hsl(38 92% 50%); }
+.table-row--danger  { border-left: 3px solid hsl(0 72% 51%); }
+
+.form-status--info { color: hsl(220 80% 50%); }
+
+/* ── Role badges ───────────────────────────────────────────── */
+.role-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  background: hsl(var(--surface-strong));
+}
+.role-badge--owner   { background: hsl(271 81% 56%); color: #fff; }
+.role-badge--manager { background: hsl(220 80% 50%); color: #fff; }
+.role-badge--staff   { background: hsl(38 92% 50%); color: #000; }
+.role-badge--viewer  { background: hsl(var(--surface-strong)); color: hsl(var(--muted)); }
+
+/* ── Team / sidebar ────────────────────────────────────────── */
+.sidebar-role-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  color: hsl(var(--muted));
+}
+
+.role-guide {
+  display: grid;
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.85rem;
+}
+.role-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: hsl(var(--surface));
+  border-radius: 0.5rem;
+}
+
+/* ── Stock table overrides ─────────────────────────────────── */
+.admin-table .table-row {
+  grid-template-columns: 1.5fr 0.7fr 0.9fr 0.7fr 1.2fr 1fr;
+}
+.admin-table .table-row.table-head {
+  grid-template-columns: 1.5fr 0.7fr 0.9fr 0.7fr 1.2fr 1fr;
+}
+

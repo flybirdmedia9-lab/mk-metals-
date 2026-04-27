@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Backend local runtime files
+backend/.env
+backend/*.db
+backend/*.db-shm
+backend/*.db-wal
+
+# Playwright artifacts
+test-results/

@@ -1,6 +1,7 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, ShieldCheck, Sparkles, Factory, Users, Layers } from 'lucide-react'
-import { getProducts, getCategories } from '../data/storage.js'
+import { ArrowRight, ShieldCheck, Sparkles, Layers } from 'lucide-react'
+import { productsApi, categoriesApi } from '../utils/api.js'
 import HeroSlider from '../components/HeroSlider.jsx'
 import ProductCard from '../components/ProductCard.jsx'
 import { useCart } from '../context/CartContext.jsx'
@@ -17,12 +18,16 @@ const heroSlides = [
 ]
 
 export default function Home() {
-  const allProducts = getProducts()
-  const categories = getCategories()
-  const featured = allProducts.filter((product) => product.featured)
+  const [allProducts, setAllProducts] = useState([])
+  const [categories, setCategories] = useState([])
+  useEffect(() => {
+    productsApi.getAll().then(setAllProducts).catch(() => {})
+    categoriesApi.getAll().then(setCategories).catch(() => {})
+  }, [])
+  const featured = allProducts.filter((p) => p.featured)
   const featuredProducts = featured.length >= 4
     ? featured.slice(0, 4)
-    : [...featured, ...allProducts.filter((product) => !product.featured).slice(0, 4 - featured.length)]
+    : [...featured, ...allProducts.filter((p) => !p.featured).slice(0, 4 - featured.length)]
   const applications = categories.slice(0, 8)
   const { addToCart } = useCart()
 

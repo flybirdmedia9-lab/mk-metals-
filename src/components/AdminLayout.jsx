@@ -1,30 +1,30 @@
 import { useMemo, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { Menu, LayoutDashboard, Box, PlusSquare, Layers, MessageSquare, ShoppingCart, Database, Star, Image, Settings2, ShieldCheck, Globe, FileText, Briefcase, LogOut, ChevronLeft } from 'lucide-react'
+import { Menu, LayoutDashboard, Box, PlusSquare, Layers, MessageSquare, Settings2, ShieldCheck, Globe, FileText, Image, Users, PackageCheck, LogOut, ChevronLeft } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
+import { canAccess } from '../utils/roles.js'
 
 const navSections = [
   {
     title: 'Business management',
     items: [
-      { label: 'Dashboard', path: 'dashboard', icon: LayoutDashboard },
-      { label: 'Products', path: 'products', icon: Box },
-      { label: 'Add Product', path: 'add-product', icon: PlusSquare },
-      { label: 'Categories', path: 'categories', icon: Layers },
-      { label: 'Enquiries', path: 'enquiries', icon: MessageSquare },
-      { label: 'Orders', path: 'orders', icon: ShoppingCart },
-      { label: 'Inventory', path: 'inventory', icon: Database },
-      { label: 'Featured', path: 'featured', icon: Star },
+      { label: 'Dashboard', path: 'dashboard', icon: LayoutDashboard, minRole: 'viewer' },
+      { label: 'Products', path: 'products', icon: Box, minRole: 'viewer' },
+      { label: 'Add Product', path: 'add-product', icon: PlusSquare, minRole: 'manager' },
+      { label: 'Categories', path: 'categories', icon: Layers, minRole: 'manager' },
+      { label: 'Stock', path: 'stock', icon: PackageCheck, minRole: 'staff' },
+      { label: 'Enquiries', path: 'enquiries', icon: MessageSquare, minRole: 'staff' },
+      { label: 'Team', path: 'team', icon: Users, minRole: 'owner' },
     ],
   },
   {
     title: 'Website content',
     items: [
-      { label: 'Content', path: 'content', icon: Globe },
-      { label: 'Testimonials', path: 'testimonials', icon: FileText },
-      { label: 'Media Library', path: 'media', icon: Image },
-      { label: 'SEO Settings', path: 'seo', icon: ShieldCheck },
-      { label: 'Settings', path: 'settings', icon: Settings2 },
+      { label: 'Content', path: 'content', icon: Globe, minRole: 'manager' },
+      { label: 'Testimonials', path: 'testimonials', icon: FileText, minRole: 'manager' },
+      { label: 'Media Library', path: 'media', icon: Image, minRole: 'manager' },
+      { label: 'SEO Settings', path: 'seo', icon: ShieldCheck, minRole: 'manager' },
+      { label: 'Settings', path: 'settings', icon: Settings2, minRole: 'owner' },
     ],
   },
 ]
@@ -43,6 +43,8 @@ export default function AdminLayout() {
     return 'Dashboard'
   }, [location.pathname])
 
+  const userRole = admin?.role || 'viewer'
+
   return (
     <div className="admin-layout">
       <aside className={`admin-sidebar ${sidebarOpen ? 'admin-sidebar--open' : ''}`}>
@@ -58,7 +60,7 @@ export default function AdminLayout() {
           {navSections.map((group) => (
             <div key={group.title} className="sidebar-group">
               <p className="sidebar-group-title">{group.title}</p>
-              {group.items.map((item) => {
+              {group.items.filter((item) => canAccess(userRole, item.minRole)).map((item) => {
                 const Icon = item.icon
                 return (
                   <NavLink
@@ -78,6 +80,10 @@ export default function AdminLayout() {
         </div>
 
         <div className="sidebar-footer">
+          <div className="sidebar-role-badge">
+            <span className={`role-badge role-badge--${userRole}`}>{userRole}</span>
+            <span>{admin?.name || admin?.email}</span>
+          </div>
           <button type="button" className="button button--outline sidebar-logout" onClick={logout}>
             <LogOut size={16} />
             Logout
@@ -87,7 +93,7 @@ export default function AdminLayout() {
 
       <div className="admin-main">
         <div className="admin-topbar admin-topbar--layout">
-          <button type="button" className="sidebar-toggle" onClick={() => setSidebarOpen((state) => !state)}>
+          <button type="button" className="sidebar-toggle" onClick={() => setSidebarOpen((s) => !s)}>
             {sidebarOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
           </button>
           <div>
@@ -97,11 +103,10 @@ export default function AdminLayout() {
           <div className="admin-profile">
             <div>
               <p>Signed in as</p>
-              <strong>{admin?.email || 'admin@mkmetals.in'}</strong>
+              <strong>{admin?.name || admin?.email}</strong>
+              <span className={`role-badge role-badge--${userRole}`} style={{ marginLeft: '8px' }}>{userRole}</span>
             </div>
-            <button type="button" className="button button--outline" onClick={logout}>
-              Logout
-            </button>
+            <button type="button" className="button button--outline" onClick={logout}>Logout</button>
           </div>
         </div>
 

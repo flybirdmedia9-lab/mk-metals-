@@ -1,9 +1,13 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getCategories, getProducts } from '../data/storage.js'
+import { categoriesApi } from '../utils/api.js'
 
 export default function Categories() {
-  const categories = getCategories()
-  const products = getProducts()
+  const [categories, setCategories] = useState([])
+
+  useEffect(() => {
+    categoriesApi.getAll().then(setCategories).catch(() => {})
+  }, [])
 
   return (
     <main>
@@ -15,23 +19,18 @@ export default function Categories() {
         </div>
 
         <div className="application-grid application-grid--compact">
-          {categories.map((category) => {
-            const count = products.filter((product) => product.category === category.id).length
-            return (
-              <article key={category.id} className="application-card application-card--compact">
-                <div>
-                  <span>{category.name}</span>
-                  <p>{category.description}</p>
-                </div>
-                <div className="category-footer">
-                  <span>{count} products</span>
-                  <Link to={`/products?category=${category.id}`} className="text-link">
-                    View items
-                  </Link>
-                </div>
-              </article>
-            )
-          })}
+          {categories.map((category) => (
+            <article key={category.id} className="application-card application-card--compact">
+              <div>
+                <span>{category.name}</span>
+                <p>{category.description}</p>
+              </div>
+              <div className="category-footer">
+                <span>{category.productCount ?? 0} products</span>
+                <Link to={`/products?category=${category.id}`} className="text-link">View items</Link>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
     </main>

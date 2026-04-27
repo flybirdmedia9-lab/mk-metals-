@@ -1,16 +1,21 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { getCategories, getProducts } from '../data/storage.js'
+import { categoriesApi, productsApi } from '../utils/api.js'
 import ProductCard from '../components/ProductCard.jsx'
 import { useCart } from '../context/CartContext.jsx'
 
 export default function Products() {
-  const categories = getCategories()
-  const products = getProducts()
+  const [categories, setCategories] = useState([])
+  const [products, setProducts] = useState([])
   const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState(searchParams.get('search') || '')
   const selectedCategory = searchParams.get('category') || ''
   const { addToCart } = useCart()
+
+  useEffect(() => {
+    productsApi.getAll().then(setProducts).catch(() => {})
+    categoriesApi.getAll().then(setCategories).catch(() => {})
+  }, [])
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
