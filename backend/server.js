@@ -36,6 +36,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' })
 })
 
-app.listen(PORT, () => {
-  console.log(`MK Metalsand backend running at http://localhost:${PORT}`)
-})
+if (process.env.NODE_ENV !== 'production' && require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`MK Metalsand backend running at http://localhost:${PORT}`)
+  })
+}
+
+module.exports = app
+

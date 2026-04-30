@@ -1,15 +1,16 @@
 {
-  "experimentalServices": {
-    "backend": {
-      "framework": "express",
-      "src": "backend"
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
     },
-    "frontend": {
-      "framework": "vite",
-      "src": "."
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
-  }
+  ]
 }
+
 
 
 
