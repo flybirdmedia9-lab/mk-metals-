@@ -1,13 +1,12 @@
 {
   "experimentalServices": {
     "backend": {
-      "framework": "express",
-      "rootDirectory": "backend"
+      "framework": "express"
     },
     "frontend": {
-      "framework": "vite",
-      "rootDirectory": "./"
+      "framework": "vite"
     }
   }
 }
+
 
