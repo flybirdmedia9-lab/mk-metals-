@@ -24,6 +24,7 @@ export default function NavBar() {
   const [open, setOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false)
+  const [isContactOpen, setIsContactOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const location = useLocation()
   const navigate = useNavigate()
@@ -128,13 +129,20 @@ export default function NavBar() {
           </nav>
 
           <div className="header-actions">
-            <div className="contact-dropdown">
-              <button className="button button--primary button--compact contact-trigger">
+            <div 
+              className="contact-dropdown"
+              onMouseEnter={() => setIsContactOpen(true)}
+              onMouseLeave={() => setIsContactOpen(false)}
+            >
+              <button 
+                className="button button--primary button--compact contact-trigger"
+                onClick={() => setIsContactOpen(!isContactOpen)}
+              >
                 <PhoneCall size={16} />
                 <span>+91 81251 39139</span>
-                <ChevronDown size={14} />
+                <ChevronDown size={14} className={isContactOpen ? 'rotate-180' : ''} />
               </button>
-              <div className="contact-menu">
+              <div className={`contact-menu ${isContactOpen ? 'contact-menu--open' : ''}`}>
                 <a href="tel:+918125139139">
                   <strong>Murali Krishna</strong>
                   <span>+91 81251 39139</span>

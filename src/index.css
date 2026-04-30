@@ -1909,10 +1909,15 @@ body.admin-route .page-container {
   backdrop-filter: blur(12px);
 }
 
-.contact-dropdown:hover .contact-menu {
+.contact-dropdown:hover .contact-menu,
+.contact-menu--open {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
 }
 
 .contact-menu a {
