@@ -1,8 +1,13 @@
 {
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
+  "experimentalServices": {
+    "backend": {
+      "framework": "express",
+      "rootDirectory": "backend"
+    },
+    "frontend": {
+      "framework": "vite",
+      "rootDirectory": "./"
     }
-  ]
+  }
 }
+
