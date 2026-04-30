@@ -1,12 +1,16 @@
 import { MapPin, Phone, Mail, ExternalLink, Globe } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import Logo from './Logo'
 
 export default function Footer() {
   return (
     <footer className="site-footer">
       <div className="container footer-inner">
         <div className="footer-branding">
-          <p className="footer-title">MK Metals</p>
+          <Link to="/" className="footer-logo-link">
+            <Logo className="footer-logo" />
+            <p className="footer-title">MK Metals</p>
+          </Link>
           <p className="footer-copy">
             Premium industrial metal products, engineered fittings, and plumbing solutions with reliable enquiry workflows.
           </p>
@@ -26,10 +30,10 @@ export default function Footer() {
             <Phone size={16} /> <a href="tel:+918125139139">+91 81251 39139</a>
           </p>
           <p>
-            <Mail size={16} /> <a href="mailto:info@mkmetals.com">info@mkmetals.com</a>
+            <Mail size={16} /> <a href="mailto:info@mkmetals.in">info@mkmetals.in</a>
           </p>
           <p>
-            <MapPin size={16} /> Shop No. 3, TSK Chambers, Opp. Ranigunj Bus Depot, Secunderabad
+            <MapPin size={16} /> #3, TSK Chambers, Opp. Ranigunj Bus Depot, M.G. Road, Ranigunj, SECUNDERABAD - 500003, Telangana.
           </p>
         </div>
 

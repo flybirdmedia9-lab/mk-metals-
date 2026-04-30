@@ -10,6 +10,7 @@ export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState(searchParams.get('search') || '')
   const selectedCategory = searchParams.get('category') || ''
+  const filterType = searchParams.get('filter') || ''
   const { addToCart } = useCart()
 
   useEffect(() => {
@@ -17,18 +18,36 @@ export default function Products() {
     categoriesApi.getAll().then(setCategories).catch(() => {})
   }, [])
 
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || ''
+    if (urlSearch !== search) {
+      setSearch(urlSearch)
+    }
+  }, [searchParams])
+
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const matchesCategory = selectedCategory ? product.category === selectedCategory : true
+      const matchesLatest = filterType === 'latest' ? product.latest === true : true
       const matchesSearch = search
         ? [product.name, product.shortDescription, product.category]
             .join(' ')
             .toLowerCase()
             .includes(search.toLowerCase())
         : true
-      return matchesCategory && matchesSearch
+      return matchesCategory && matchesSearch && matchesLatest
     })
-  }, [products, selectedCategory, search])
+  }, [products, selectedCategory, search, filterType])
+
+  const handleSearchChange = (val) => {
+    setSearch(val)
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      if (val) next.set('search', val)
+      else next.delete('search')
+      return next
+    }, { replace: true })
+  }
 
   const handleCategory = (id) => {
     setSearchParams((prev) => {
@@ -46,8 +65,14 @@ export default function Products() {
     <main className="container page-container">
       <section className="section section--wide">
         <div className="section-heading">
-          <span className="section-label">Product catalog</span>
-          <h1>Browse our complete metal and plumbing inventory.</h1>
+          <span className="section-label">
+            {filterType === 'latest' ? 'New Arrivals' : 'Product catalog'}
+          </span>
+          <h1>
+            {filterType === 'latest' 
+              ? 'Check out our latest premium metal fixings.' 
+              : 'Browse our complete metal and plumbing inventory.'}
+          </h1>
           <p>Filter by category, compare stock status, and add items to your enquiry cart.</p>
         </div>
 
@@ -59,7 +84,7 @@ export default function Products() {
               type="search"
               placeholder="Search by name, category or spec"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => handleSearchChange(event.target.value)}
             />
           </div>
 

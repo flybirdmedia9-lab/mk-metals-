@@ -15,16 +15,19 @@ export default function Contact() {
             <div className="contact-cards">
               <article>
                 <h3>Office</h3>
-                <p>Shop No. 3, TSK Chambers, Opp. Ranigunj Bus Depot</p>
-                <p>Hyderabad, Telangana 500003</p>
+                <p>#3, TSK Chambers, Opp. Ranigunj Bus Depot</p>
+                <p>M.G. Road, Ranigunj, SECUNDERABAD - 500003</p>
+                <p>Telangana, India</p>
               </article>
               <article>
                 <h3>Phone</h3>
-                <a href="tel:+918125139139">+91 81251 39139</a>
+                <p>Murali Krishna: <a href="tel:+918125139139">+91 81251 39139</a></p>
+                <p>Mobile: <a href="tel:+918500065222">+91 85000 65222</a></p>
+                <p>Landline: <a href="tel:+9104042700227">040 427 00 227</a></p>
               </article>
               <article>
                 <h3>Email</h3>
-                <a href="mailto:info@mkmetals.com">info@mkmetals.com</a>
+                <a href="mailto:info@mkmetals.in">info@mkmetals.in</a>
               </article>
             </div>
           </div>
