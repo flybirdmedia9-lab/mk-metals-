@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, ShieldCheck, Sparkles, Layers } from 'lucide-react'
+import { ArrowRight, ShieldCheck, Sparkles, Layers, MessageCircle } from 'lucide-react'
 import { productsApi, categoriesApi } from '../utils/api.js'
 import HeroSlider from '../components/HeroSlider.jsx'
 import ProductCard from '../components/ProductCard.jsx'
@@ -28,6 +28,7 @@ export default function Home() {
   const featuredProducts = featured.length >= 4
     ? featured.slice(0, 4)
     : [...featured, ...allProducts.filter((p) => !p.featured).slice(0, 4 - featured.length)]
+  const previewProducts = featuredProducts.slice(0, 3)
   const applications = categories.slice(0, 8)
   const { addToCart } = useCart()
 
@@ -39,8 +40,10 @@ export default function Home() {
         <div className="container hero-shell">
           <div className="hero-content">
             <span className="eyebrow">Industrial Manufacturing</span>
-            <h1>
-              Precision <span className="hero-accent">extrusions</span> and engineered metal solutions.
+            <h1 className="home-hero-title">
+              <span>Precision </span>
+              <span className="hero-accent">extrusions</span>
+              <span> and engineered metal solutions.</span>
             </h1>
             <p>
               MK Metals delivers high-performance metal products and plumbing systems for commercial, construction, and industrial projects across India.
@@ -88,60 +91,65 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="features-grid">
-          <article className="feature-card feature-card--elevated">
-            <ShieldCheck size={24} />
-            <h3>Trusted specification workflows</h3>
-            <p>Clear product details and curated machining solutions that reduce procurement guesswork.</p>
-          </article>
-          <article className="feature-card feature-card--elevated">
-            <Sparkles size={24} />
-            <h3>Premium materials assurance</h3>
-            <p>Quality-tested metal profiles and fittings for industrial, construction and plumbing applications.</p>
-          </article>
-          <article className="feature-card feature-card--elevated">
-            <Layers size={24} />
-            <h3>Efficient enquiry experience</h3>
-            <p>Products and categories are structured for fast evaluation and contact through WhatsApp or direct sales.</p>
-          </article>
+        <div className="container">
+          <div className="features-grid">
+            <article className="feature-card feature-card--elevated">
+              <ShieldCheck size={24} />
+              <h3>Trusted specification workflows</h3>
+              <p>Clear product details and curated machining solutions that reduce procurement guesswork.</p>
+            </article>
+            <article className="feature-card feature-card--elevated">
+              <Sparkles size={24} />
+              <h3>Premium materials assurance</h3>
+              <p>Quality-tested metal profiles and fittings for industrial, construction and plumbing applications.</p>
+            </article>
+            <article className="feature-card feature-card--elevated">
+              <Layers size={24} />
+              <h3>Efficient enquiry experience</h3>
+              <p>Products and categories are structured for fast evaluation and contact through WhatsApp or direct sales.</p>
+            </article>
+          </div>
         </div>
       </section>
 
       <section className="section">
-        <div className="container about-panel">
-          <div className="about-visual">
-            <img src={heroImage} alt="Industrial manufacturing facility" />
-          </div>
-          <div className="about-content">
-            <span className="section-label">About MK Metals</span>
-            <h2>
-              Engineering excellence in custom <span className="hero-accent">extrusions</span>
-            </h2>
-            <p>
-              MK Metals combines manufacturing experience with engineering precision to deliver reliable metal products and consultation for demanding projects.
-            </p>
-            <div className="about-features">
-              <div className="feature-pill">Custom extrusion profiles</div>
-              <div className="feature-pill">Industrial fittings & fixings</div>
-              <div className="feature-pill">WhatsApp enquiry-ready catalog</div>
+        <div className="container about-section-stack">
+          <div className="about-panel">
+            <div className="about-visual">
+              <img src={heroImage} alt="Industrial manufacturing facility" />
             </div>
-            <div className="stats-grid">
-              <div className="stat-card">
-                <strong>15+</strong>
-                <span>Years experience</span>
+            <div className="about-content">
+              <span className="section-label">About MK Metals</span>
+              <h2>
+                Engineering excellence in custom <span className="hero-accent">extrusions</span>
+              </h2>
+              <p>
+                MK Metals combines manufacturing experience with engineering precision to deliver reliable metal products and consultation for demanding projects.
+              </p>
+              <div className="about-features">
+                <div className="feature-pill">Custom extrusion profiles</div>
+                <div className="feature-pill">Industrial fittings & fixings</div>
+                <div className="feature-pill">WhatsApp enquiry-ready catalog</div>
               </div>
-              <div className="stat-card">
-                <strong>98%</strong>
-                <span>Client satisfaction</span>
-              </div>
-              <div className="stat-card">
-                <strong>{categories.length}</strong>
-                <span>Product lines</span>
-              </div>
-              <div className="stat-card">
-                <strong>{allProducts.length}</strong>
-                <span>Catalog items</span>
-              </div>
+            </div>
+          </div>
+
+          <div className="stats-grid about-stats-home">
+            <div className="stat-card">
+              <strong>15+</strong>
+              <span>Years experience</span>
+            </div>
+            <div className="stat-card">
+              <strong>98%</strong>
+              <span>Client satisfaction</span>
+            </div>
+            <div className="stat-card">
+              <strong>{categories.length}</strong>
+              <span>Product lines</span>
+            </div>
+            <div className="stat-card">
+              <strong>{allProducts.length}</strong>
+              <span>Catalog items</span>
             </div>
           </div>
         </div>
@@ -181,22 +189,43 @@ export default function Home() {
       </section>
 
       <section className="section stats-section section--light">
-        <div className="container stats-grid">
-          <div className="stat-card stat-card--highlight">
-            <strong>15+</strong>
-            <span>Years of experience</span>
+        <div className="container">
+          <div className="section-heading products-preview-heading">
+            <span className="section-label">Catalog Preview</span>
+            <h2>Explore quick picks from our industrial product range.</h2>
+            <p>Review featured catalog items and jump straight to product details or an enquiry.</p>
           </div>
-          <div className="stat-card stat-card--highlight">
-            <strong>98%</strong>
-            <span>Customer satisfaction</span>
-          </div>
-          <div className="stat-card stat-card--highlight">
-            <strong>{allProducts.length}</strong>
-            <span>Products listed</span>
-          </div>
-          <div className="stat-card stat-card--highlight">
-            <strong>{categories.length}</strong>
-            <span>Specialty categories</span>
+
+          <div className="products-preview-grid">
+            {previewProducts.map((product) => {
+              const whatsappHref = `https://wa.me/918125139139?text=${encodeURIComponent(
+                `Hi, I am interested in ${product.name}. Please share availability and pricing details.`,
+              )}`
+
+              return (
+                <article key={product.id} className="product-preview-card">
+                  <div className="product-preview-media">
+                    {product.image ? <img src={product.image} alt={product.name} loading="lazy" /> : <div className="product-card-image-placeholder" />}
+                  </div>
+                  <div className="product-preview-body">
+                    <div>
+                      <h3>{product.name}</h3>
+                      <p>{product.shortDescription}</p>
+                    </div>
+
+                    <div className="product-preview-actions">
+                      <Link to={`/products/${product.slug}`} className="button button--primary button--compact">
+                        View Details
+                      </Link>
+                      <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="button button--outline button--compact">
+                        <MessageCircle size={16} />
+                        Enquire
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              )
+            })}
           </div>
         </div>
       </section>
